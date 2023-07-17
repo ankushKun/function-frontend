@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokemon Contract Frontend</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>Pokemon Contract Frontend</h1>
+    <label for="pokemonName">Pokemon Name:</label>
+    <input type="text" id="pokemonName" required>
+    <button onclick="catchPokemon()">Catch Pokemon</button>
+
+    <h2>Trainer and Pokemon Info:</h2>
+    <p id="trainerInfo">Trainer: N/A</p>
+    <p id="pokemonInfo">Pokemon: N/A</p>
+
+    <script>
+         web3 = new Web3(web3.currentProvider);
+         // web3 = new Web3(new Web3.providers.HttpProvider("YOUR_PROVIDER_URL"));
+
+        const contractAddress = 'adddressHerer';
+        const contractABI = [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getPokemon",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "pokemonName",
+                        "type": "string"
+                    }
+                ],
+                "name": "catchPokemon",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        async function catchPokemon() {
+            const pokemonName = document.getElementById("pokemonName").value;
+            const accounts = await web3.eth.getAccounts();
+            const account = accounts[0];
+
+            try {
+                await contract.methods.catchPokemon(pokemonName).send({ from: account });
+                alert(`You caught a ${pokemonName}!`);
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        async function updatePokemonInfo() {
+            const [trainer, pokemon] = await contract.methods.getPokemon().call();
+            document.getElementById("trainerInfo").innerText = `Trainer: ${trainer}`;
+            document.getElementById("pokemonInfo").innerText = `Pokemon: ${pokemon}`;
+        }
+
+        setInterval(updatePokemonInfo,1000)
+        
+    </script>
+</body>
+</html>
